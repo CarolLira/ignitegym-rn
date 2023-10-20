@@ -1,4 +1,10 @@
-import { Text, View, StatusBar } from 'react-native';
+import { StatusBar } from 'react-native';
+import { NativeBaseProvider } from 'native-base';
+import { Loading } from '@components/Loading';
+import { SignUp } from '@screens/SignUp';
+
+import { THEME } from './src/theme';
+
 import {
   useFonts,
   Roboto_400Regular,
@@ -12,13 +18,13 @@ export default function App() {
   });
 
   return (
-    <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: '#202024' }}>
+    <NativeBaseProvider theme={THEME}>
       <StatusBar
         barStyle='light-content'
         backgroundColor='transparent'
         translucent
       />
-      {fontsLoaded ? <Text>Hieeee!</Text> : <View />}
-    </View>
+      {fontsLoaded ? <SignUp /> : <Loading />}
+    </NativeBaseProvider>
   );
 }
