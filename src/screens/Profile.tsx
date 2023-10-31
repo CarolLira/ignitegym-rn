@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Alert, TouchableOpacity } from 'react-native';
+import { TouchableOpacity } from 'react-native';
 import { Center, ScrollView, VStack, Skeleton, Text, Heading, useToast } from 'native-base';
 import * as ImagePicker from 'expo-image-picker';
 import * as FileSystem from 'expo-file-system';
@@ -114,6 +114,7 @@ export function Profile() {
                     <Heading
                         color='gray.200'
                         fontSize='md'
+                        fontFamily='heading'
                         alignSelf='flex-start'
                         mb={2}
                     >
