@@ -3,19 +3,23 @@ import { useForm, Controller } from 'react-hook-form';
 import * as yup from 'yup';
 import { yupResolver } from '@hookform/resolvers/yup';
 
+import { api } from '@services/api';
+
 import {
     VStack,
     Image,
     Text,
     Center,
     Heading,
-    ScrollView
+    ScrollView,
+    useToast,
 } from 'native-base';
 
 import LogoSvg from '@assets/logo.svg';
 import BackgroundImg from '@assets/background.png';
 import { Input } from '@components/Input';
 import { Button } from '@components/Button';
+import { AppError } from '@utils/AppError';
 
 import { AuthNavigatorRoutesProps } from '@routes/auth.routes';
 
@@ -34,6 +38,8 @@ const signUpSchema = yup.object({
 });
 
 export function SignUp() {
+    const toast = useToast();
+
     const { control, handleSubmit, formState: { errors } } = useForm<FormDataProps>({
         resolver: yupResolver(signUpSchema)
     });
@@ -43,8 +49,19 @@ export function SignUp() {
         navigation.navigate('signIn');
     }
 
-    function handleSignUp({ name, email, password, password_confirm }: FormDataProps) {
-        console.log(name);
+    async function handleSignUp({ name, email, password }: FormDataProps) {
+        try {
+            const response = await api.post('/users', { name, email, password });
+        } catch (error) {
+            const isAppError = error instanceof AppError;
+            const title = isAppError ? error.message : 'Não foi possível criar a conta. Tente novamente mais tarde.'
+
+            toast.show({
+                title,
+                placement: 'top',
+                bgColor: 'red.500',
+            });
+        }
     }
 
     return (
@@ -147,3 +164,15 @@ export function SignUp() {
         </ScrollView>
     );
 }
+
+// --- Requisição usando fetch api ---
+// const response = await fetch('http://.../users', {
+//     method: 'POST',
+//     headers: {
+//         'Accept': 'application/json',
+//         'Content-Type': 'application/json',
+//     },
+//     body: JSON.stringify({name, email, password})
+// });
+
+// const data = await response.json();
