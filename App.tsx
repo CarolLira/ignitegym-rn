@@ -3,6 +3,8 @@ import { NativeBaseProvider } from 'native-base';
 import { Loading } from '@components/Loading';
 import { Routes } from './src/routes';
 
+import { AuthContextProvider } from '@contexts/AuthContext';
+
 import { THEME } from './src/theme';
 
 import {
@@ -24,7 +26,9 @@ export default function App() {
         backgroundColor='transparent'
         translucent
       />
-      {fontsLoaded ? <Routes /> : <Loading />}
+      <AuthContextProvider>
+        {fontsLoaded ? <Routes /> : <Loading />}
+      </AuthContextProvider>
     </NativeBaseProvider>
   );
 }

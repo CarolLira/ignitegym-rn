@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { useNavigation } from '@react-navigation/native';
 import { useForm, Controller } from 'react-hook-form';
 import * as yup from 'yup';
@@ -22,6 +23,7 @@ import { Button } from '@components/Button';
 import { AppError } from '@utils/AppError';
 
 import { AuthNavigatorRoutesProps } from '@routes/auth.routes';
+import { useAuth } from '@hooks/useAuth';
 
 type FormDataProps = {
     name: string;
@@ -38,6 +40,10 @@ const signUpSchema = yup.object({
 });
 
 export function SignUp() {
+    const [isLoading, setIsLoading] = useState(false);
+
+    const { signIn } = useAuth();
+
     const toast = useToast();
 
     const { control, handleSubmit, formState: { errors } } = useForm<FormDataProps>({
@@ -51,7 +57,10 @@ export function SignUp() {
 
     async function handleSignUp({ name, email, password }: FormDataProps) {
         try {
-            const response = await api.post('/users', { name, email, password });
+            setIsLoading(true);
+            await api.post('/users', { name, email, password });
+            await signIn(email, password);
+
         } catch (error) {
             const isAppError = error instanceof AppError;
             const title = isAppError ? error.message : 'Não foi possível criar a conta. Tente novamente mais tarde.'
@@ -61,6 +70,8 @@ export function SignUp() {
                 placement: 'top',
                 bgColor: 'red.500',
             });
+        } finally {
+            setIsLoading(false);
         }
     }
 
@@ -151,6 +162,7 @@ export function SignUp() {
                     <Button
                         title='Criar e acessar'
                         onPress={handleSubmit(handleSignUp)}
+                        isLoading={isLoading}
                     />
                 </Center>
 
