@@ -13,6 +13,7 @@ import { UserPhoto } from '@components/UserPhoto';
 import { Input } from '@components/Input';
 import { Button } from '@components/Button';
 import { useAuth } from '@hooks/useAuth';
+import defaultUserPhoto from '@assets/userPhotoDefault.png';
 
 import { api } from '@services/api';
 import { AppError } from '@utils/AppError';
@@ -53,7 +54,6 @@ const profileSchema = yup.object({
 export function Profile() {
     const [isUpdating, setIsUpdating] = useState(false);
     const [photoIsLoading, setPhotoIsLoading] = useState(false);
-    const [userPhoto, setUserPhoto] = useState('https://github.com/CarolLira.png');
 
     const toast = useToast();
     const { user, updateUserProfile } = useAuth();
@@ -68,7 +68,7 @@ export function Profile() {
 
     async function handleSelectUserPhoto() {
         setPhotoIsLoading(true);
-        
+
         try {
             const selectedPhoto = await ImagePicker.launchImageLibraryAsync({
                 mediaTypes: ImagePicker.MediaTypeOptions.Images,
@@ -83,6 +83,8 @@ export function Profile() {
             }
 
             if (selectedPhoto.assets[0].uri) {
+                const photoData = selectedPhoto.assets[0];
+
                 const photoInfo = await FileSystem.getInfoAsync(selectedPhoto.assets[0].uri, { size: true }) as FileInfo;
 
                 if (photoInfo.size && (photoInfo.size / 1024 / 1024) > 5) {
@@ -93,7 +95,33 @@ export function Profile() {
                     });
                 }
 
-                setUserPhoto(selectedPhoto.assets[0].uri);
+                const fileExtension = photoData.uri.split('.').pop();
+                console.log(fileExtension);
+
+                const photoFile = {
+                    name: `${user.name}-${Date.now()}.${fileExtension}`.replaceAll(' ', '').toLocaleLowerCase(),
+                    uri: photoData.uri,
+                    type: `${photoData.type}/${fileExtension}`
+                } as any
+
+                const userPhotoUploadForm = new FormData();
+                userPhotoUploadForm.append('avatar', photoFile);
+
+                const avatarUpdatedResponse = await api.patch('/users/avatar', userPhotoUploadForm, {
+                    headers: {
+                        'Content-Type': 'multipart/form-data',
+                    }
+                });
+
+                toast.show({
+                    title: 'Foto atualizada!',
+                    placement: 'top',
+                    bgColor: 'green.500',
+                });
+
+                const userUpdated = user;
+                userUpdated.avatar = avatarUpdatedResponse.data.avatar;
+                updateUserProfile(userUpdated);
             }
         } catch (error) {
             console.log(error);
@@ -108,7 +136,7 @@ export function Profile() {
 
             const userUpdated = user;
             userUpdated.name = data.name;
-            
+
             await api.put('/users', data);
             await updateUserProfile(userUpdated);
 
@@ -120,7 +148,7 @@ export function Profile() {
         } catch (error) {
             const isAppError = error instanceof AppError;
             const title = isAppError ? error.message : 'Não foi possível atualizar os dados.'
-        
+
             toast.show({
                 title,
                 placement: 'top',
@@ -147,7 +175,11 @@ export function Profile() {
                                 endColor='gray.400'
                             /> :
                             <UserPhoto
-                                source={{ uri: userPhoto }}
+                                source={
+                                    user.avatar
+                                        ? { uri: `${api.defaults.baseURL}/avatar/${user.avatar}` }
+                                        : defaultUserPhoto
+                                }
                                 alt='Foto do usuário'
                                 size={PHOTO_SIZE}
                             />
