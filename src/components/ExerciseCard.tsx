@@ -3,16 +3,19 @@ import { HStack, Heading, Image, VStack, Text, Icon } from "native-base";
 
 import { Entypo } from '@expo/vector-icons';
 
-type Props = TouchableOpacityProps & {
+import { api } from "@services/api";
+import { ExerciseDTO } from "@dtos/ExerciseDTO";
 
+type Props = TouchableOpacityProps & {
+    data: ExerciseDTO;
 };
 
-export function ExerciseCard({...rest}: Props) {
+export function ExerciseCard({ data, ...rest}: Props) {
     return (
         <TouchableOpacity {...rest}>
             <HStack bg='gray.500' alignItems='center' p={2} pr={4} mb={3} rounded='md'>
                 <Image
-                    source={{ uri: 'https://static.tuasaude.com/media/article/wv/no/treino-costas_57722_l.jpg' }}
+                    source={{ uri: `${api.defaults.baseURL}/exercise/thumb/${data.thumb}` }}
                     alt='Imagem remada unilateral'
                     w={16}
                     h={16}
@@ -22,10 +25,10 @@ export function ExerciseCard({...rest}: Props) {
                 />
                 <VStack flex={1}>
                     <Heading color='white' fontSize='lg' fontFamily='heading'>
-                        Remada unilateral
+                        {data.name}
                     </Heading>
                     <Text color='gray.200' fontSize='sm' numberOfLines={2}>
-                        3 séries x 12 repetições
+                        {data.series} séries x {data.repetitions} repetições
                     </Text>
                 </VStack>
 
