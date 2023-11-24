@@ -96,7 +96,6 @@ export function Profile() {
                 }
 
                 const fileExtension = photoData.uri.split('.').pop();
-                console.log(fileExtension);
 
                 const photoFile = {
                     name: `${user.name}-${Date.now()}.${fileExtension}`.replaceAll(' ', '').toLocaleLowerCase(),
